@@ -53,20 +53,12 @@
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-	
-		<dependency>
+		 <dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>3.6.28</version> <!-- Use the latest version -->
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version> <!-- Use the latest version -->
-			<scope>test</scope>
-    	</dependency>
+			<version>5.11.0</version>
+        <scope>test</scope>
+    </dependency>
 
 	</dependencies>
 
