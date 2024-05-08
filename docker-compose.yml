@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   achat:
-    image: "hazemhanachi/achat-1.0"
+    image: "hazemhannachi/achat-1.0"
     restart: on-failure
     ports:
       - "8089:8089"
