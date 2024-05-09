@@ -1,24 +1,22 @@
-package tn.esprit.rh.achat.controllers;
+package tn.esprit.rh.achat;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import tn.esprit.rh.achat.controllers.ProduitRestController;
 import tn.esprit.rh.achat.entities.Produit;
 import tn.esprit.rh.achat.services.IProduitService;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-public class ProduitRestControllerTest {
+class ProduitRestControllerTest {
 
     @Mock
     private IProduitService produitService;
@@ -26,95 +24,81 @@ public class ProduitRestControllerTest {
     @InjectMocks
     private ProduitRestController produitRestController;
 
-    private MockMvc mockMvc;
-
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(produitRestController).build();
+        MockitoAnnotations.openMocks(this);  // Initialiser les objets Mock
     }
 
     @Test
-    void testRetrieveAllProduits() throws Exception {
-        // Créez une liste de produits de test
-        Produit p1 = new Produit(1L, "Produit1", 10.0, 100);
-        Produit p2 = new Produit(2L, "Produit2", 20.0, 200);
+    void testGetProduits() {
+        // Given
+        List<Produit> produits = new ArrayList<>();
+        produits.add(new Produit(1L, "Produit A"));
+        produits.add(new Produit(2L, "Produit B"));
+        when(produitService.retrieveAllProduits()).thenReturn(produits);  // Simuler la réponse du service
 
-        // Simulez le comportement du service
-        when(produitService.retrieveAllProduits()).thenReturn(Arrays.asList(p1, p2));
+        // When
+        List<Produit> result = produitRestController.getProduits();  // Appeler la méthode du contrôleur
 
-        // Testez la requête GET /retrieve-all-produits
-        mockMvc.perform(get("/produit/retrieve-all-produits"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].nom").value("Produit1"))
-                .andExpect(jsonPath("$[1].nom").value("Produit2"));
+        // Then
+        assertNotNull(result);  // S'assurer que le résultat n'est pas nul
+        assertEquals(2, result.size());  // S'assurer que le nombre d'éléments est correct
+        assertEquals("Produit A", result.get(0).getNomProduit());  // Vérifier les valeurs attendues
+        assertEquals("Produit B", result.get(1).getNomProduit());
     }
 
     @Test
-    void testRetrieveProduit() throws Exception {
-        // Créez un produit de test
+    void testRetrieveProduit() {
+        // Given
         Long produitId = 1L;
-        Produit p = new Produit(produitId, "Produit1", 10.0, 100);
+        Produit expectedProduit = new Produit(produitId, "Produit A");
+        when(produitService.retrieveProduit(produitId)).thenReturn(expectedProduit);  // Simuler le service
 
-        // Simulez le comportement du service
-        when(produitService.retrieveProduit(produitId)).thenReturn(p);
+        // When
+        Produit result = produitRestController.retrieveRayon(produitId);  // Appeler la méthode du contrôleur
 
-        // Testez la requête GET /retrieve-produit/{produit-id}
-        mockMvc.perform(get("/produit/retrieve-produit/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nom").value("Produit1"));
+        // Then
+        assertNotNull(result);  // S'assurer que le résultat n'est pas nul
+        assertEquals(expectedProduit, result);  // Vérifier que le produit récupéré est le bon
     }
 
     @Test
-    void testAddProduit() throws Exception {
-        // Créez un produit de test
-        Produit p = new Produit(1L, "Produit1", 10.0, 100);
+    void testAddProduit() {
+        // Given
+        Produit newProduit = new Produit(3L, "Produit C");
+        when(produitService.addProduit(newProduit)).thenReturn(newProduit);  // Simuler le service
 
-        // Simulez le comportement du service
-        when(produitService.addProduit(any(Produit.class))).thenReturn(p);
+        // When
+        Produit result = produitRestController.addProduit(newProduit);  // Appeler la méthode du contrôleur
 
-        String requestBody = "{ \"nom\": \"Produit1\", \"prix\": 10.0, \"quantite\": 100 }";
-
-        // Testez la requête POST /add-produit
-        mockMvc.perform(post("/produit/add-produit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nom").value("Produit1"));
+        // Then
+        assertNotNull(result);  // S'assurer que le résultat n'est pas nul
+        assertEquals("Produit C", result.getNomProduit());  // Vérifier le nom du produit ajouté
     }
 
     @Test
-    void testRemoveProduit() throws Exception {
+    void testRemoveProduit() {
+        // Given
         Long produitId = 1L;
 
-        // Simulez la suppression
-        doNothing().when(produitService).deleteProduit(produitId);
+        // When
+        produitRestController.removeProduit(produitId);  // Appeler la méthode du contrôleur
 
-        // Testez la requête DELETE /remove-produit/{produit-id}
-        mockMvc.perform(delete("/produit/remove-produit/1"))
-                .andExpect(status().isOk());
-
-        // Vérifiez que la méthode de suppression a été appelée
-        verify(produitService, times(1)).deleteProduit(produitId);
+        // Then
+        verify(produitService, times(1)).deleteProduit(produitId);  // S'assurer que le service est appelé
     }
 
     @Test
-    void testModifyProduit() throws Exception {
-        // Créez un produit mis à jour
-        Produit updatedProduit = new Produit(1L, "ProduitUpdated", 15.0, 150);
+    void testModifyProduit() {
+        // Given
+        Produit updatedProduit = new Produit(1L, "Produit Modifié");
+        when(produitService.updateProduit(updatedProduit)).thenReturn(updatedProduit);  // Simuler le service
 
-        // Simulez le comportement du service
-        when(produitService.updateProduit(any(Produit.class))).thenReturn(updatedProduit);
+        // When
+        Produit result = produitRestController.modifyProduit(updatedProduit);  // Appeler la méthode du contrôleur
 
-        String requestBody = "{ \"id\": 1, \"nom\": \"ProduitUpdated\", \"prix\": 15.0, \"quantite\": 150 }";
-
-        // Testez la requête PUT /modify-produit
-        mockMvc.perform(put("/produit/modify-produit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nom").value("ProduitUpdated"));
+        // Then
+        assertNotNull(result);  // S'assurer que le résultat n'est pas nul
+        assertEquals("Produit Modifié", result.getNomProduit());  // Vérifier le nom du produit modifié
     }
 }
