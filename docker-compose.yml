@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   achat:
-    image: "alaziza1/achat"
+    image: "alaziza1/achat-1.0"
     restart: on-failure
     ports:
       - "8089:8089"
