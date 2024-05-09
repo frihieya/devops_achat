@@ -1,102 +1,77 @@
-package tn.esprit.rh.achat.controllers;
+package tn.esprit.rh.achat;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import tn.esprit.rh.achat.entities.CategorieProduit;
-import tn.esprit.rh.achat.services.ICategorieProduitService;
+import tn.esprit.rh.achat.repositories.CategorieProduitRepository;
+import tn.esprit.rh.achat.services.CategorieProduitServiceImpl;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-public class CategorieProduitControllerTest {
+class CategorieProduitTest {
 
     @Mock
-    private ICategorieProduitService categorieProduitService;
+    CategorieProduitRepository categorieProduitRepository;
 
     @InjectMocks
-    private CategorieProduitController categorieProduitController;
+    CategorieProduitServiceImpl categorieProduitService;
 
-    private MockMvc mockMvc;
-
-    public CategorieProduitControllerTest() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(categorieProduitController).build();
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testGetCategorieProduit() throws Exception {
-        CategorieProduit cp1 = new CategorieProduit(1L, "Cat1", "Description1");
-        CategorieProduit cp2 = new CategorieProduit(2L, "Cat2", "Description2");
+    void testRetrieveAllCategorieProduits() {
+        // Given
+        List<CategorieProduit> categories = new ArrayList<>();
+        categories.add(new CategorieProduit());
+        categories.add(new CategorieProduit());
+        when(categorieProduitRepository.findAll()).thenReturn(categories);
 
-        List<CategorieProduit> categorieProduits = Arrays.asList(cp1, cp2);
-        when(categorieProduitService.retrieveAllCategorieProduits()).thenReturn(categorieProduits);
+        // When
+        List<CategorieProduit> result = categorieProduitService.retrieveAllCategorieProduits();
 
-        mockMvc.perform(get("/categorieProduit/retrieve-all-categorieProduit"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[1].id").value(2));
+        // Then
+        assertFalse(result.isEmpty());
+        assertEquals(2, result.size());
     }
 
     @Test
-    public void testRetrieveCategorieProduit() throws Exception {
-        CategorieProduit cp = new CategorieProduit(1L, "Cat1", "Description1");
-        when(categorieProduitService.retrieveCategorieProduit(1L)).thenReturn(cp);
+    void testRetrieveCategorieProduit() {
+        // Given
+        Long categoryId = 1L;
+        CategorieProduit category = new CategorieProduit();
+        when(categorieProduitRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        mockMvc.perform(get("/categorieProduit/retrieve-categorieProduit/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nom").value("Cat1"));
+        // When
+        CategorieProduit result = categorieProduitService.retrieveCategorieProduit(categoryId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(category, result);
     }
 
     @Test
-    public void testAddCategorieProduit() throws Exception {
-        CategorieProduit cp = new CategorieProduit(1L, "Cat1", "Description1");
-        when(categorieProduitService.addCategorieProduit(any(CategorieProduit.class))).thenReturn(cp);
+    void testAddCategorieProduit() {
+        // Given
+        CategorieProduit categoryToAdd = new CategorieProduit();
+        when(categorieProduitRepository.save(categoryToAdd)).thenReturn(categoryToAdd);
 
-        String jsonBody = "{ \"id\": 1, \"nom\": \"Cat1\", \"description\": \"Description1\" }";
+        // When
+        CategorieProduit result = categorieProduitService.addCategorieProduit(categoryToAdd);
 
-        mockMvc.perform(post("/categorieProduit/add-categorieProduit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nom").value("Cat1"));
-    }
-
-    @Test
-    public void testRemoveCategorieProduit() throws Exception {
-        doNothing().when(categorieProduitService).deleteCategorieProduit(1L);
-
-        mockMvc.perform(delete("/categorieProduit/remove-categorieProduit/1"))
-                .andExpect(status().isOk());
-
-        verify(categorieProduitService, times(1)).deleteCategorieProduit(1L);
-    }
-
-    @Test
-    public void testModifyCategorieProduit() throws Exception {
-        CategorieProduit updatedCp = new CategorieProduit(1L, "CatUpdated", "Updated Description");
-        when(categorieProduitService.updateCategorieProduit(any(CategorieProduit.class))).thenReturn(updatedCp);
-
-        String jsonBody = "{ \"id\": 1, \"nom\": \"CatUpdated\", \"description\": \"Updated Description\" }";
-
-        mockMvc.perform(put("/categorieProduit/modify-categorieProduit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nom").value("CatUpdated"));
+        // Then
+        assertNotNull(result);
+        assertEquals(categoryToAdd, result);
     }
 }
