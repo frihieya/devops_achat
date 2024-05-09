@@ -12,93 +12,109 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import tn.esprit.rh.achat.controllers.ProduitRestController;
-import tn.esprit.rh.achat.entities.Produit;
-import tn.esprit.rh.achat.services.IProduitService;
+import tn.esprit.rh.achat.controllers.FournisseurRestController;
+import tn.esprit.rh.achat.entities.Fournisseur;
+import tn.esprit.rh.achat.services.IFournisseurService;
 
-class ProduitRestControllerTest {
+public class FournisseurRestControllerTest {
 
     @Mock
-    private IProduitService produitService;
+    private IFournisseurService fournisseurService;  // Simuler le service
 
     @InjectMocks
-    private ProduitRestController produitRestController;
+    private FournisseurRestController fournisseurRestController;  // Injecter le contrôleur avec les objets simulés
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);  // Initialiser les objets Mock
+        MockitoAnnotations.openMocks(this);  // Initialiser les objets simulés
     }
 
     @Test
-    void testGetProduits() {
-        // Given
-        List<Produit> produits = new ArrayList<>();
-        produits.add(new Produit(1L, "Produit A"));
-        produits.add(new Produit(2L, "Produit B"));
-        when(produitService.retrieveAllProduits()).thenReturn(produits);  // Simuler la réponse du service
+    void testGetFournisseurs() {
+        // Préparation des données simulées
+        List<Fournisseur> fournisseurs = new ArrayList<>();
+        Fournisseur fournisseur1 = new Fournisseur(1L, "Fournisseur A");
+        Fournisseur fournisseur2 = new Fournisseur(2L, "Fournisseur B");
+        fournisseurs.add(fournisseur1);
+        fournisseurs.add(fournisseur2);
 
-        // When
-        List<Produit> result = produitRestController.getProduits();  // Appeler la méthode du contrôleur
+        when(fournisseurService.retrieveAllFournisseurs()).thenReturn(fournisseurs);  // Simulation du service
 
-        // Then
+        // Appel de la méthode du contrôleur
+        List<Fournisseur> result = fournisseurRestController.getFournisseurs();
+
+        // Assertions pour valider les résultats
         assertNotNull(result);  // S'assurer que le résultat n'est pas nul
-        assertEquals(2, result.size());  // S'assurer que le nombre d'éléments est correct
-        assertEquals("Produit A", result.get(0).getNomProduit());  // Vérifier les valeurs attendues
-        assertEquals("Produit B", result.get(1).getNomProduit());
+        assertEquals(2, result.size());  // Vérifier le nombre d'éléments
+        assertEquals("Fournisseur A", result.get(0).getNom());  // Vérifier les noms des fournisseurs
+        assertEquals("Fournisseur B", result.get(1).getNom());
     }
 
     @Test
-    void testRetrieveProduit() {
-        // Given
-        Long produitId = 1L;
-        Produit expectedProduit = new Produit(produitId, "Produit A");
-        when(produitService.retrieveProduit(produitId)).thenReturn(expectedProduit);  // Simuler le service
+    void testRetrieveFournisseur() {
+        // Préparation des données simulées
+        Long fournisseurId = 1L;
+        Fournisseur expectedFournisseur = new Fournisseur(fournisseurId, "Fournisseur A");
+        when(fournisseurService.retrieveFournisseur(fournisseurId)).thenReturn(expectedFournisseur);  // Simulation du service
 
-        // When
-        Produit result = produitRestController.retrieveRayon(produitId);  // Appeler la méthode du contrôleur
+        // Appel de la méthode du contrôleur
+        Fournisseur result = fournisseurRestController.retrieveFournisseur(fournisseurId);
 
-        // Then
+        // Assertions pour valider le résultat
         assertNotNull(result);  // S'assurer que le résultat n'est pas nul
-        assertEquals(expectedProduit, result);  // Vérifier que le produit récupéré est le bon
+        assertEquals("Fournisseur A", result.getNom());  // Vérifier que le nom correspond
     }
 
     @Test
-    void testAddProduit() {
-        // Given
-        Produit newProduit = new Produit(3L, "Produit C");
-        when(produitService.addProduit(newProduit)).thenReturn(newProduit);  // Simuler le service
+    void testAddFournisseur() {
+        // Préparation des données simulées
+        Fournisseur newFournisseur = new Fournisseur(3L, "Fournisseur C");
+        when(fournisseurService.addFournisseur(newFournisseur)).thenReturn(newFournisseur);  // Simulation du service
 
-        // When
-        Produit result = produitRestController.addProduit(newProduit);  // Appeler la méthode du contrôleur
+        // Appel de la méthode du contrôleur
+        Fournisseur result = fournisseurRestController.addFournisseur(newFournisseur);
 
-        // Then
+        // Assertions pour valider le résultat
         assertNotNull(result);  // S'assurer que le résultat n'est pas nul
-        assertEquals("Produit C", result.getNomProduit());  // Vérifier le nom du produit ajouté
+        assertEquals("Fournisseur C", result.getNom());  // Vérifier le nom du nouveau fournisseur
     }
 
     @Test
-    void testRemoveProduit() {
-        // Given
-        Long produitId = 1L;
+    void testRemoveFournisseur() {
+        // Préparation des données simulées
+        Long fournisseurId = 1L;
 
-        // When
-        produitRestController.removeProduit(produitId);  // Appeler la méthode du contrôleur
+        // Appel de la méthode du contrôleur
+        fournisseurRestController.removeFournisseur(fournisseurId);
 
-        // Then
-        verify(produitService, times(1)).deleteProduit(produitId);  // S'assurer que le service est appelé
+        // Vérification que le service a été appelé
+        verify(fournisseurService, times(1)).deleteFournisseur(fournisseurId);  // Vérifier que le service a été appelé
     }
 
     @Test
-    void testModifyProduit() {
-        // Given
-        Produit updatedProduit = new Produit(1L, "Produit Modifié");
-        when(produitService.updateProduit(updatedProduit)).thenReturn(updatedProduit);  // Simuler le service
+    void testModifyFournisseur() {
+        // Préparation des données simulées
+        Fournisseur updatedFournisseur = new Fournisseur(1L, "Fournisseur Modifié");
+        when(fournisseurService.updateFournisseur(updatedFournisseur)).thenReturn(updatedFournisseur);  // Simulation du service
 
-        // When
-        Produit result = produitRestController.modifyProduit(updatedProduit);  // Appeler la méthode du contrôleur
+        // Appel de la méthode du contrôleur
+        Fournisseur result = fournisseurRestController.modifyFournisseur(updatedFournisseur);
 
-        // Then
+        // Assertions pour valider le résultat
         assertNotNull(result);  // S'assurer que le résultat n'est pas nul
-        assertEquals("Produit Modifié", result.getNomProduit());  // Vérifier le nom du produit modifié
+        assertEquals("Fournisseur Modifié", result.getNom());  // Vérifier le nom du fournisseur modifié
+    }
+
+    @Test
+    void testAssignSecteurActiviteToFournisseur() {
+        // Préparation des données simulées
+        Long idSecteurActivite = 1L;
+        Long idFournisseur = 1L;
+
+        // Appel de la méthode du contrôleur
+        fournisseurRestController.assignProduitToStock(idSecteurActivite, idFournisseur);
+
+        // Vérification que le service a été appelé
+        verify(fournisseurService, times(1)).assignSecteurActiviteToFournisseur(idSecteurActivite, idFournisseur);  // Vérifier que le service a été appelé
     }
 }
