@@ -2,34 +2,23 @@ version: "3.9"
 services:
 
   achat:
-    container_name: achat_container
     image: "alaziza1/achat"
+    restart: on-failure
     ports:
-      - "8090:8090"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - "8089:8089"
     depends_on:
       -  db-mysql
 
   db-mysql:
-    image: "mysql:5.6"
-    container_name: db-mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=root  #indisponsable pour la conteneurisation
-      #- MYSQL_DATABASE=job
-    ports:
-      - "3307:3306"
+    image: "mysql:5.7"
     restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_DATABASE=achatdb
+    ports:
+      - "3306:3306"
     volumes:
       - db:/var/lib/mysql
-
-
-  node-exporter:
-    image: prom/node-exporter
-    container_name: node-exporter
-    ports:
-      - "9100:9100"
-
 
 volumes:
   db:
