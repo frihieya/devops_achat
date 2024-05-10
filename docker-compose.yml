@@ -2,7 +2,7 @@ version: "2"
 services:
 
   achat:
-    image: "missaouions/achat-1.0"
+    image: "onsmissaoui/achat-1.0"
     restart: on-failure
     ports:
       - "8089:8089"
